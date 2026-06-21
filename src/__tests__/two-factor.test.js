@@ -164,6 +164,44 @@ describe("Two-Factor Authentication Integration Tests", () => {
       expect(db.rows).toHaveLength(1)
       expect(db.rows[0].secret).toBe("+1234567890")
     })
+
+    it("issues an OTP on email setup with verification and only enables on the correct code", async () => {
+      const agent = request.agent(app)
+      await registerAndLogin(agent, "email-verify@example.com")
+
+      const setup = await agent.post("/2fa/setup-email").send({ requireVerification: true }).expect(200)
+      expect(setup.body.otpValue).toBeDefined()
+      expect(setup.body.maskedContact).toContain("*")
+
+      // not enabled until the code is confirmed
+      let status = await agent.get("/2fa/is-enabled").expect(200)
+      expect(status.body.email).toBe(false)
+
+      // a wrong code is rejected and leaves the method unverified
+      const wrong = await agent.post("/2fa/verify-setup").send({ code: "000000", mechanism: "email" })
+      expect(wrong.status).toBe(400)
+      expect(wrong.body.error).toContain("Invalid two-factor")
+      status = await agent.get("/2fa/is-enabled").expect(200)
+      expect(status.body.email).toBe(false)
+
+      // the issued OTP enables it
+      await agent.post("/2fa/verify-setup").send({ code: setup.body.otpValue, mechanism: "email" }).expect(200)
+      status = await agent.get("/2fa/is-enabled").expect(200)
+      expect(status.body.email).toBe(true)
+    })
+
+    it("verifies SMS setup with the issued OTP", async () => {
+      const agent = request.agent(app)
+      await registerAndLogin(agent, "sms-verify@example.com")
+
+      const setup = await agent.post("/2fa/setup-sms").send({ phoneNumber: "+15551234567", requireVerification: true }).expect(200)
+      expect(setup.body.otpValue).toBeDefined()
+      expect(setup.body.maskedContact).toContain("*")
+
+      await agent.post("/2fa/verify-setup").send({ code: setup.body.otpValue, mechanism: "sms" }).expect(200)
+      const status = await agent.get("/2fa/is-enabled").expect(200)
+      expect(status.body.sms).toBe(true)
+    })
   })
 
   // ---- login flow with 2FA ----

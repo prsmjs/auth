@@ -50,16 +50,33 @@ The method stays unverified until the user provides a valid code from their auth
 
 ## Enroll email OTP
 
+Enable immediately (the caller trusts the address):
+
 ```js
 await req.auth.twoFactor.setup.email()
 await req.auth.twoFactor.setup.email("alternate@example.com")
 ```
 
-## Enroll SMS OTP
+Or require a verification code first. With `requireVerification` true, setup issues a one-time code and returns it for you to deliver - the package never sends email or SMS itself. The method stays unverified until `complete.email()` validates that code:
 
 ```js
-await req.auth.twoFactor.setup.sms("+15551234567")
+const { otpValue, maskedContact } = await req.auth.twoFactor.setup.email(email, true)
+await sendEmail(email, `Your verification code is ${otpValue}`)
+// later, with the code the user entered:
+await req.auth.twoFactor.complete.email(req.body.code) // throws InvalidTwoFactorCodeError on mismatch
 ```
+
+## Enroll SMS OTP
+
+SMS setup requires verification by default - it returns a code for you to send, and the number is enabled only once `complete.sms()` validates it:
+
+```js
+const { otpValue, maskedContact } = await req.auth.twoFactor.setup.sms("+15551234567")
+await sendSms("+15551234567", `Your verification code is ${otpValue}`)
+await req.auth.twoFactor.complete.sms(req.body.code)
+```
+
+Pass `false` as the second argument to enable a number without a verification step.
 
 ## Login with 2FA
 

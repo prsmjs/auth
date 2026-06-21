@@ -89,10 +89,13 @@ export class TwoFactorManager {
       },
 
       /**
-       * Begin email 2FA setup, optionally deferring verification.
+       * Begin email 2FA setup. When requireVerification is true, an OTP is
+       * issued and returned for the application to deliver; the method stays
+       * unverified until complete.email() validates that code. When false, the
+       * method is enabled immediately (the caller is trusting the address).
        * @param {string} [email]
        * @param {boolean} [requireVerification]
-       * @returns {Promise<void>}
+       * @returns {Promise<{ otpValue: string, maskedContact: string } | void>}
        * @throws {UserNotLoggedInError|TwoFactorAlreadyEnabledError}
        */
       email: async (email, requireVerification = false) => {
@@ -129,14 +132,25 @@ export class TwoFactorManager {
 
         if (verified) {
           await this.activityLogger.logActivity(accountId, AuthActivityAction.TwoFactorSetup, this.req, true, { mechanism: "email" })
+          return
         }
+
+        // issue an OTP for the caller to deliver, and stash its selector so
+        // complete.email() can verify the entered code. the otp value is never
+        // sent anywhere by this library
+        const { otp, selector } = await this.otpProvider.createAndStoreOTP(accountId, TwoFactorMechanism.EMAIL)
+        this.storeSetupSelector(TwoFactorMechanism.EMAIL, selector)
+        return { otpValue: otp, maskedContact: this.otpProvider.maskEmail(userEmail) }
       },
 
       /**
-       * Begin SMS 2FA setup, optionally deferring verification.
+       * Begin SMS 2FA setup. When requireVerification is true (the default), an
+       * OTP is issued and returned for the application to deliver; the method
+       * stays unverified until complete.sms() validates that code. When false,
+       * the method is enabled immediately (the caller is trusting the number).
        * @param {string} phone
        * @param {boolean} [requireVerification]
-       * @returns {Promise<void>}
+       * @returns {Promise<{ otpValue: string, maskedContact: string } | void>}
        * @throws {UserNotLoggedInError|TwoFactorAlreadyEnabledError}
        */
       sms: async (phone, requireVerification = true) => {
@@ -172,7 +186,15 @@ export class TwoFactorManager {
 
         if (verified) {
           await this.activityLogger.logActivity(accountId, AuthActivityAction.TwoFactorSetup, this.req, true, { mechanism: "sms" })
+          return
         }
+
+        // issue an OTP for the caller to deliver, and stash its selector so
+        // complete.sms() can verify the entered code. the otp value is never
+        // sent anywhere by this library
+        const { otp, selector } = await this.otpProvider.createAndStoreOTP(accountId, TwoFactorMechanism.SMS)
+        this.storeSetupSelector(TwoFactorMechanism.SMS, selector)
+        return { otpValue: otp, maskedContact: this.otpProvider.maskPhone(phone) }
       },
     }
 
@@ -448,11 +470,28 @@ export class TwoFactorManager {
   }
 
   /**
-   * Mark an OTP-based (email/SMS) method as verified to complete its setup.
+   * Stash the OTP selector issued during email/sms setup so complete() can find
+   * it on the follow-up request. Selectors live in the session, never reach the
+   * client, and point at the hashed token verifyOTP consumes.
+   * @param {number} mechanism EMAIL or SMS
+   * @param {string} selector
+   */
+  storeSetupSelector(mechanism, selector) {
+    if (!this.req.session?.auth) return
+    const key = mechanism === TwoFactorMechanism.EMAIL ? "email" : "sms"
+    this.req.session.auth.twoFactorSetup = {
+      ...(this.req.session.auth.twoFactorSetup || {}),
+      [key]: selector,
+    }
+  }
+
+  /**
+   * Complete email/SMS setup by verifying the OTP that setup issued. Marks the
+   * method verified only when the supplied code matches the stored token.
    * @param {number} mechanism EMAIL or SMS
    * @param {string} code
    * @returns {Promise<void>}
-   * @throws {UserNotLoggedInError|TwoFactorNotSetupError|TwoFactorAlreadyEnabledError}
+   * @throws {UserNotLoggedInError|TwoFactorNotSetupError|TwoFactorAlreadyEnabledError|InvalidTwoFactorCodeError}
    */
   async completeOtpSetup(mechanism, code) {
     const accountId = this.getAccountId()
@@ -471,18 +510,30 @@ export class TwoFactorManager {
       throw new TwoFactorAlreadyEnabledError()
     }
 
-    // for setup completion, we need a temporary OTP that was sent during setup
-    // this should be handled by the application calling this method after sending an OTP
-    // for now, we'll assume the code is valid if provided (in a real implementation,
-    // you'd generate and store a temporary OTP during the setup process)
+    const key = mechanism === TwoFactorMechanism.EMAIL ? "email" : "sms"
+    const selector = this.req.session?.auth?.twoFactorSetup?.[key]
 
-    // mark as verified
+    // no selector means setup was never started with verification (or it expired
+    // out of the session) - there is nothing to validate the code against, so
+    // fail closed rather than enabling the method
+    const { isValid } = selector ? await this.otpProvider.verifyOTP(selector, code) : { isValid: false }
+
+    if (!isValid) {
+      await this.activityLogger.logActivity(accountId, AuthActivityAction.TwoFactorFailed, this.req, false, { mechanism: key, reason: "invalid_code" })
+      throw new InvalidTwoFactorCodeError()
+    }
+
+    // clear the consumed selector
+    if (this.req.session?.auth?.twoFactorSetup) {
+      delete this.req.session.auth.twoFactorSetup[key]
+    }
+
     await this.queries.updateTwoFactorMethod(method.id, {
       verified: true,
       last_used_at: new Date(),
     })
 
-    await this.activityLogger.logActivity(accountId, AuthActivityAction.TwoFactorSetup, this.req, true, { mechanism: mechanism === TwoFactorMechanism.EMAIL ? "email" : "sms" })
+    await this.activityLogger.logActivity(accountId, AuthActivityAction.TwoFactorSetup, this.req, true, { mechanism: key })
   }
 
   /**

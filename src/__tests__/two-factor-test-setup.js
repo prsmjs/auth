@@ -235,8 +235,8 @@ export async function createTwoFactorTestApp() {
   app.post("/2fa/setup-email", async (req, res) => {
     try {
       const { requireVerification } = req.body || {}
-      await req.auth.twoFactor.setup.email(undefined, requireVerification)
-      res.json({ success: true })
+      const result = await req.auth.twoFactor.setup.email(undefined, requireVerification)
+      res.json({ success: true, ...(result || {}) })
     } catch (error) {
       res.status(400).json({ error: error.message })
     }
@@ -245,8 +245,8 @@ export async function createTwoFactorTestApp() {
   app.post("/2fa/setup-sms", async (req, res) => {
     try {
       const { phoneNumber, requireVerification } = req.body || {}
-      await req.auth.twoFactor.setup.sms(phoneNumber, requireVerification !== false)
-      res.json({ success: true })
+      const result = await req.auth.twoFactor.setup.sms(phoneNumber, requireVerification !== false)
+      res.json({ success: true, ...(result || {}) })
     } catch (error) {
       res.status(400).json({ error: error.message })
     }

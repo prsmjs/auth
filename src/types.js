@@ -217,6 +217,7 @@
  * @property {boolean} [shouldForceLogout]
  * @property {ImpersonationActor} [actor]
  * @property {AwaitingTwoFactor} [awaitingTwoFactor]
+ * @property {{ email?: string, sms?: string }} [twoFactorSetup] OTP selectors for in-progress email/sms 2fa enrollment, awaiting complete()
  */
 
 /**
