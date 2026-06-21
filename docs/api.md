@@ -121,3 +121,28 @@ Each provider (`.github`, `.google`, `.azure`) exposes:
 | `removeRoleFromUser(config, identifier, role)` | Remove a role without request context |
 | `setUserRoles(config, identifier, rolemask)` | Set the complete rolemask |
 | `getUserRoles(config, identifier)` | Get the current rolemask |
+| `isValidEmail(email)` / `validateEmail(email)` | Check or assert email format |
+
+`createAuthContext(config)` returns the requestless operations above plus the read methods the admin dashboard binds to - see [Standalone and requestless auth](./standalone.md) and [Admin panel with devtools](./devtools.md).
+
+## Enums and constants
+
+Runtime values exported from the package, used for status, roles, mechanisms, and activity actions:
+
+| Export | Members |
+|--------|---------|
+| `AuthStatus` | `Normal` (0), `Archived` (1), `Banned` (2), `Locked` (3), `PendingReview` (4), `Suspended` (5) |
+| `AuthRole` | the 22 built-in roles (`Admin`, `Author`, `Editor`, `SuperAdmin`, …) used when `config.roles` is unset |
+| `TwoFactorMechanism` | `TOTP` (1), `EMAIL` (2), `SMS` (3) |
+| `AuthActivityAction` | activity log action strings (`login`, `failed_login`, `role_changed`, `impersonation_started`, …) |
+
+```js
+import { AuthStatus, AuthRole, TwoFactorMechanism } from "@prsm/auth"
+
+await req.auth.setStatusForUserBy({ email }, AuthStatus.Banned)
+await req.auth.twoFactor.disable(TwoFactorMechanism.TOTP)
+```
+
+## Classes
+
+For advanced use, the underlying classes are exported too: `TwoFactorManager`, `TotpProvider`, `OtpProvider`, `ActivityLogger`, and the OAuth providers `GitHubProvider` / `GoogleProvider` / `AzureProvider` / `BaseOAuthProvider`. Most applications use the `req.auth` surface and the standalone functions instead.

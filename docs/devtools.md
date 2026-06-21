@@ -24,6 +24,8 @@ Read methods used by the dashboard:
 | `getProvidersForAccount(accountId)` | linked OAuth providers |
 | `getTwoFactorMethods(accountId)` | configured 2FA methods |
 | `getRoles()` | the role name to bitmask map (`config.roles` or `AuthRole`) |
+| `getStatuses()` | the account status name to code map (`AuthStatus`) |
+| `getMechanisms()` | the 2FA mechanism name to code map (`TwoFactorMechanism`) |
 | `getStats()` | row counts and expired-token counts |
 | `getRecentActivity(limit, accountId)` | recent activity rows |
 | `getActivityStats()` | aggregated activity stats |

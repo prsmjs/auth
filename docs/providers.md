@@ -37,7 +37,7 @@ const authConfig = {
   db: pool,
   createUser: async (userData) => {
     // userData: { id, email, username?, name?, avatar? }
-    const user = await db.insert(users).values({
+    const [user] = await db.insert(users).values({
       name: userData.name,
       email: userData.email,
     }).returning()

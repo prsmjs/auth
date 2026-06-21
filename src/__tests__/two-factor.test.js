@@ -390,7 +390,7 @@ describe("Two-Factor Authentication Integration Tests", () => {
 
       const uriResponse = await agent.get("/2fa/totp-uri").expect(200)
       expect(uriResponse.body.uri).toContain("otpauth://totp/")
-      expect(uriResponse.body.uri).toContain("EasyAccess")
+      expect(uriResponse.body.uri).toContain("Prsm%20Auth%20Test")
     })
 
     it("should return null TOTP URI when not setup", async () => {

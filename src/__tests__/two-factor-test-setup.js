@@ -55,7 +55,7 @@ export async function createTwoFactorTestApp() {
     resyncInterval: "30s",
     twoFactor: {
       enabled: true,
-      issuer: "EasyAccess Test",
+      issuer: "Prsm Auth Test",
       totpWindow: 1,
       backupCodesCount: 10,
     },

@@ -13,7 +13,7 @@ The `user_id` column on `{prefix}accounts` links an auth account to your own use
 Pass your user ID as the third argument to `register`:
 
 ```js
-const user = await db.insert(users).values({ email, tenant_id }).returning()
+const [user] = await db.insert(users).values({ email, tenant_id }).returning()
 const account = await req.auth.register(email, password, user.id)
 ```
 
@@ -32,7 +32,7 @@ The `createUser` hook in the config runs when a new OAuth user signs in and no m
 const authConfig = {
   db: pool,
   createUser: async (userData) => {
-    const user = await db.insert(users).values({
+    const [user] = await db.insert(users).values({
       email: userData.email,
       name: userData.name,
       tenant_id: defaultTenantId,
@@ -54,7 +54,7 @@ CREATE TABLE users (id uuid PRIMARY KEY, tenant_id uuid REFERENCES tenants(id), 
 
 ```js
 app.post("/register", async (req, res) => {
-  const user = await db.insert(users).values({
+  const [user] = await db.insert(users).values({
     email: req.body.email,
     tenant_id: req.body.tenantId,
   }).returning()

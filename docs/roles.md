@@ -31,7 +31,7 @@ Names are preserved exactly as provided, with no transformation. The maximum is 
 
 ## Built-in roles
 
-If you don't set `config.roles`, the built-in `AuthRole` enum is used. It has 21 predefined roles (Admin, Author, Collaborator, and so on).
+If you don't set `config.roles`, the built-in `AuthRole` enum is used. It has 22 predefined roles (Admin, Author, Collaborator, and so on).
 
 ```js
 import { AuthRole } from "@prsm/auth"
@@ -44,6 +44,7 @@ await req.auth.addRoleForUserBy({ email: "user@example.com" }, AuthRole.Admin | 
 ```js
 await req.auth.addRoleForUserBy({ email: "user@example.com" }, Roles.editor)
 await req.auth.removeRoleForUserBy({ email: "user@example.com" }, Roles.editor)
+const userIsEditor = await req.auth.hasRoleForUserBy({ email: "user@example.com" }, Roles.editor)
 
 const canEdit = await req.auth.hasRole(Roles.editor)
 const isAdmin = await req.auth.isAdmin()

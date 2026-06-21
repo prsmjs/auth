@@ -97,11 +97,12 @@ const authConfig = {
     google: { clientId, clientSecret, redirectUri },
     azure: { clientId, clientSecret, tenantId, redirectUri },
   },
+  githubUserAgent: "prsm-auth",   // User-Agent sent to the GitHub API, default "prsm-auth"
 
   twoFactor: {
     enabled: false,
     requireForOAuth: false,
-    issuer: undefined,
+    issuer: undefined,            // shown in authenticator apps, default "prsm-auth"
     codeLength: 6,
     tokenExpiry: "5m",
     totpWindow: 1,
@@ -110,8 +111,8 @@ const authConfig = {
 
   impersonation: {
     enabled: false,
-    defaultTtl: "1h",
-    maxTtl: "4h",
+    defaultTtl: undefined,        // no default; an impersonation lasts until you stop it unless a ttl is given
+    maxTtl: undefined,            // no default cap; set to bound the effective ttl
     canImpersonate: async (actor, target) => false,
   },
 

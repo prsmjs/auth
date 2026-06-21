@@ -28,7 +28,7 @@ export class TotpProvider {
    * @returns {string}
    */
   generateQRCode(email, secret) {
-    const issuer = this.config.twoFactor?.issuer || "EasyAccess"
+    const issuer = this.config.twoFactor?.issuer || "prsm-auth"
     return Otp.createTotpKeyUriForQrCode(issuer, email, secret)
   }
 

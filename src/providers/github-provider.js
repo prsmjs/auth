@@ -51,7 +51,7 @@ export class GitHubProvider extends BaseOAuthProvider {
 
     const apiHeaders = {
       Accept: "application/vnd.github+json",
-      "User-Agent": this.authConfig.githubUserAgent || "EasyAccess",
+      "User-Agent": this.authConfig.githubUserAgent || "prsm-auth",
       "X-GitHub-Api-Version": "2022-11-28",
     }
 
