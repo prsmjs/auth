@@ -1,6 +1,6 @@
 {
   "name": "@prsm/auth",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "PostgreSQL-backed authentication for Express: sessions, remember-me, password reset, email confirmation, OAuth, roles, two-factor, and audited impersonation",
   "type": "module",
   "exports": {

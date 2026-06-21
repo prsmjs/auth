@@ -13,8 +13,9 @@ const MAX_ROLES = 31
  * Define a set of named roles as a frozen bitmask map. Each role gets the next
  * power-of-two bit. Capped at 31 because postgres INTEGER is 32-bit signed.
  *
- * @param {...string} names
- * @returns {Readonly<Record<string, number>>}
+ * @template {string} K
+ * @param {...K} names
+ * @returns {Readonly<Record<K, number>>}
  */
 export function defineRoles(...names) {
   if (names.length > MAX_ROLES) {
