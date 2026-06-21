@@ -1,9 +1,13 @@
-<img src="logo.svg" alt="@prsm/auth" width="96" height="96">
+<p align="center">
+  <img src="logo.svg" width="80" height="80" alt="auth logo">
+</p>
 
-# @prsm/auth
+<h1 align="center">@prsm/auth</h1>
 
-[![test](https://github.com/prsmjs/auth/actions/workflows/test.yml/badge.svg)](https://github.com/prsmjs/auth/actions/workflows/test.yml)
-[![npm](https://img.shields.io/npm/v/@prsm/auth)](https://www.npmjs.com/package/@prsm/auth)
+<p align="center">
+  <a href="https://github.com/prsmjs/auth/actions/workflows/test.yml"><img src="https://github.com/prsmjs/auth/actions/workflows/test.yml/badge.svg" alt="test"></a>
+  <a href="https://www.npmjs.com/package/@prsm/auth"><img src="https://img.shields.io/npm/v/@prsm/auth" alt="npm"></a>
+</p>
 
 PostgreSQL-backed authentication for Express. It owns its own auth tables and links to your user records through `user_id`, so it stays out of the way of however you model application users. One middleware attaches everything to `req.auth`: registration, login, sessions, remember-me, email confirmation, password reset, OAuth, role bitmasks, two-factor authentication, and audited impersonation.
 
