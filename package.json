@@ -1,0 +1,76 @@
+{
+  "name": "@prsm/auth",
+  "version": "1.0.0",
+  "description": "PostgreSQL-backed authentication for Express: sessions, remember-me, password reset, email confirmation, OAuth, roles, two-factor, and audited impersonation",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./src/index.js"
+    }
+  },
+  "types": "./index.d.ts",
+  "files": [
+    "src",
+    "types",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "test": "vitest --reporter=verbose --run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npx tsc --declaration --allowJs --emitDeclarationOnly --skipLibCheck --target es2020 --module nodenext --moduleResolution nodenext --strict false --esModuleInterop true --outDir ./types src/index.js"
+  },
+  "keywords": [
+    "auth",
+    "authentication",
+    "express",
+    "session",
+    "postgres",
+    "oauth",
+    "two-factor",
+    "totp"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prsmjs/auth.git"
+  },
+  "homepage": "https://github.com/prsmjs/auth#readme",
+  "bugs": {
+    "url": "https://github.com/prsmjs/auth/issues"
+  },
+  "dependencies": {
+    "@prsm/hash": "^2.0.1",
+    "@prsm/ms": "^2.0.0",
+    "bowser": "^2.11.0"
+  },
+  "peerDependencies": {
+    "cookie-parser": "^1.4.0",
+    "express": "^5.0.0",
+    "express-session": "^1.18.0",
+    "pg": "^8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "cookie-parser": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@prsm/trace": "^1.2.0",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.2",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.5",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "pg": "^8.16.3",
+    "supertest": "^7.1.4",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
