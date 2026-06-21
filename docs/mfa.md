@@ -120,7 +120,7 @@ app.post("/verify-2fa", async (req, res) => {
 })
 ```
 
-Other verifiers: `verify.email(code)`, `verify.sms(code)`, `verify.backupCode(code)`, and `verify.otp(code)` (tries email and SMS automatically).
+Other verifiers: `verify.email(code)`, `verify.sms(code)`, `verify.backupCode(code)`, and `verify.otp(code)`. Use `verify.otp()` when your login form has a single code field and no channel picker - it checks the code against email first, then SMS, and succeeds if either matches.
 
 ## Management
 

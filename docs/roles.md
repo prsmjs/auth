@@ -27,7 +27,7 @@ This does two things:
 - `getRoleNames()` returns your custom names instead of the built-in defaults
 - The [@prsm/devtools](https://github.com/prsmjs/devtools) admin panel reads roles from the bound context, so your custom roles show up automatically
 
-Names are preserved exactly as provided, with no transformation. The maximum is 31 roles, since PostgreSQL `INTEGER` is 32-bit signed. Order matters: do not reorder or remove roles from the middle, or existing users' rolemasks will map to the wrong names.
+Names are preserved exactly as provided, with no transformation. The maximum is 31 roles, since PostgreSQL `INTEGER` is 32-bit signed. Order matters: do not reorder or remove roles from the middle, or existing users' rolemasks will map to the wrong names. Adding new roles to the end is always safe, since each role's bit depends only on its position.
 
 ## Built-in roles
 

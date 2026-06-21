@@ -53,3 +53,5 @@ await req.auth.logoutEverywhereElse()
 - `logout()` clears the current session and remember token
 - `logoutEverywhere()` clears all sessions and remember tokens
 - `logoutEverywhereElse()` keeps the current session and clears everything else
+
+"All sessions" means every device and browser the account is signed in on, not just the current request - it bumps the account's force-logout counter so each of those sessions is dropped on its next request. Reach for it after a password change, a lost or stolen device, or any time the user wants to sign out everywhere at once.

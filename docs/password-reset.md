@@ -45,6 +45,8 @@ Errors:
 - `ResetDisabledError` - account has `resettable = false`
 - `TooManyResetsError` - too many pending reset requests
 
+A missing account and an unverified one throw the same error on purpose, so the response can't reveal whether an account exists.
+
 ## Complete reset
 
 ```js

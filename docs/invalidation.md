@@ -4,7 +4,7 @@ These three integrations are optional and duck-typed. The package never imports 
 
 ## Cross-instance invalidation
 
-By default a session re-reads account state from the database on an interval (`resyncInterval`, default `"30s"`). A ban, role change, or force-logout made on one instance can therefore take up to that long to reach an instance that already has the session cached. See [Sessions and resync](./sessions.md) for the resync mechanics.
+By default a session re-reads account state from the database on an interval (`resyncInterval`, default `"30s"`). A ban, role change, or force-logout made on one instance can therefore take up to that long to reach an instance that already has the session cached. Until that resync happens, the stale instance keeps honoring the old session, so a banned or force-logged-out user can still make authenticated requests on it for up to that interval. See [Sessions and resync](./sessions.md) for the resync mechanics.
 
 Turn on PostgreSQL `LISTEN/NOTIFY` and those changes propagate immediately:
 

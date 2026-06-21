@@ -44,7 +44,7 @@ Returns `{ account, source }` where:
 - `account` is the `AuthAccount` or `null`
 - `source` is `"session"`, `"remember"`, or `null`
 
-It checks the session first, then falls back to the remember-me cookie. It validates that the account exists and has `Normal` status.
+It checks the session first, then falls back to the remember-me cookie. It validates that the account exists and has `Normal` status. An account that exists but isn't in `Normal` status (for example, banned) also returns `null` here, just like an unauthenticated request.
 
 ```js
 wss.on("connection", async (ws, req) => {
