@@ -11,8 +11,6 @@
 
 PostgreSQL-backed authentication for Express. It owns its own auth tables and links to your user records through `user_id`, so it stays out of the way of however you model application users. One middleware attaches everything to `req.auth`: registration, login, sessions, remember-me, email confirmation, password reset, OAuth, role bitmasks, two-factor authentication, and audited impersonation.
 
-It runs on a single shared PostgreSQL database behind any number of stateless app instances. Session storage is delegated to `express-session`, so you pick the store. Optional PostgreSQL `LISTEN/NOTIFY` propagates bans, role changes, and force-logouts across the fleet the instant they happen, with no Redis required.
-
 ## Install
 
 ```bash
