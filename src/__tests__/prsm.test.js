@@ -107,6 +107,8 @@ describe("createAuthContext devtools surface", () => {
     const { accounts, total } = await ctx.listAccounts({ limit: 10 })
     expect(total).toBe(2)
     expect(accounts.length).toBe(2)
+    // every account carries a twoFactor array (empty when none enabled)
+    expect(accounts.every((a) => Array.isArray(a.twoFactor) && a.twoFactor.length === 0)).toBe(true)
   })
 
   it("searches accounts by email", async () => {
@@ -190,6 +192,15 @@ describe("createAuthContext devtools surface", () => {
   it("rejects removing a 2FA method that does not belong to the account", async () => {
     const account = await ctx.getAccount({ email: "ctx2fa@example.com" })
     await expect(ctx.removeTwoFactorMethod({ accountId: account.id }, 999999)).rejects.toThrow()
+  })
+
+  it("includes verified 2FA mechanisms in listAccounts", async () => {
+    const account = await ctx.createUser({ email: "ctx2falist@example.com", password: "password123" }, "u-2fal")
+    await pool.query(`INSERT INTO prsm_ctx_2fa_methods (account_id, mechanism, secret, verified) VALUES ($1, $2, $3, true)`, [account.id, TwoFactorMechanism.TOTP, "SECRETSECRETSECRET"])
+
+    const { accounts } = await ctx.listAccounts({ search: "ctx2falist@", limit: 5 })
+    const row = accounts.find((a) => a.id === account.id)
+    expect(row.twoFactor).toContain(TwoFactorMechanism.TOTP)
   })
 })
 

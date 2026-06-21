@@ -19,7 +19,7 @@ Read methods used by the dashboard:
 
 | Method | Returns |
 |--------|---------|
-| `listAccounts({ limit, offset, search })` | `{ accounts, total }` |
+| `listAccounts({ limit, offset, search })` | `{ accounts, total }` - each account includes a `twoFactor` array of its enabled mechanism codes |
 | `getAccount(identifier)` | the `AuthAccount` |
 | `getProvidersForAccount(accountId)` | linked OAuth providers |
 | `getTwoFactorMethods(accountId)` | configured 2FA methods |

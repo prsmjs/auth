@@ -80,12 +80,17 @@ export function createAuthContext(config) {
     // introspection surface for @prsm/devtools
 
     /**
+     * Each returned account carries an added `twoFactor` array of the verified 2FA
+     * mechanism codes enabled on it (empty when none), so the dashboard can show
+     * enabled mechanisms in the list.
      * @param {{ limit?: number, offset?: number, search?: string }} [opts]
-     * @returns {Promise<{ accounts: AuthAccount[], total: number }>}
+     * @returns {Promise<{ accounts: (AuthAccount & { twoFactor: number[] })[], total: number }>}
      */
     async listAccounts(opts = {}) {
       const [accounts, total] = await Promise.all([queries.listAccounts(opts), queries.countAccounts(opts.search)])
-      return { accounts, total }
+      const mechanisms = await queries.findVerifiedTwoFactorMechanisms(accounts.map((a) => a.id))
+      const enriched = accounts.map((a) => ({ ...a, twoFactor: mechanisms.get(a.id) || [] }))
+      return { accounts: enriched, total }
     },
 
     /**

@@ -115,6 +115,24 @@ export class AuthQueries {
   }
 
   /**
+   * Verified 2FA mechanisms for a set of accounts, grouped by account id. Used by
+   * the devtools binding to show enabled mechanisms in the account list without an
+   * N+1 query.
+   * @param {number[]} accountIds
+   * @returns {Promise<Map<number, number[]>>}
+   */
+  async findVerifiedTwoFactorMechanisms(accountIds) {
+    const map = new Map()
+    if (!accountIds.length) return map
+    const result = await this.db.query(`SELECT account_id, mechanism FROM ${this.twoFactorMethodsTable} WHERE account_id = ANY($1) AND verified = true`, [accountIds])
+    for (const row of result.rows) {
+      if (!map.has(row.account_id)) map.set(row.account_id, [])
+      map.get(row.account_id).push(row.mechanism)
+    }
+    return map
+  }
+
+  /**
    * @param {{ userId: string | number, email: string, password: string | null, verified: boolean, status: number, rolemask: number }} data
    * @returns {Promise<AuthAccount>}
    */
