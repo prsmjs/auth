@@ -173,6 +173,24 @@ describe("createAuthContext devtools surface", () => {
     const account = await ctx.getAccount({ email: "a@example.com" })
     expect((account.rolemask & AuthRole.Admin) === AuthRole.Admin).toBe(true)
   })
+
+  it("removes a two-factor method by id (admin rescue path)", async () => {
+    const account = await ctx.createUser({ email: "ctx2fa@example.com", password: "password123" }, "u-2fa")
+    await pool.query(`INSERT INTO prsm_ctx_2fa_methods (account_id, mechanism, secret, verified) VALUES ($1, $2, $3, true)`, [account.id, TwoFactorMechanism.TOTP, "SECRETSECRETSECRET"])
+
+    let methods = await ctx.getTwoFactorMethods(account.id)
+    expect(methods).toHaveLength(1)
+
+    await ctx.removeTwoFactorMethod({ accountId: account.id }, methods[0].id)
+
+    methods = await ctx.getTwoFactorMethods(account.id)
+    expect(methods).toHaveLength(0)
+  })
+
+  it("rejects removing a 2FA method that does not belong to the account", async () => {
+    const account = await ctx.getAccount({ email: "ctx2fa@example.com" })
+    await expect(ctx.removeTwoFactorMethod({ accountId: account.id }, 999999)).rejects.toThrow()
+  })
 })
 
 describe("cross-instance invalidation (postgres LISTEN/NOTIFY)", () => {

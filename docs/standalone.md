@@ -25,6 +25,7 @@ User-management methods:
 - `changePasswordForUserBy`, `setStatusForUserBy`
 - `resetPassword`, `confirmResetPassword`, `initiatePasswordResetForUserBy`
 - `userExistsByEmail`
+- `removeTwoFactorMethod` (delete one of a user's 2FA methods - admin rescue for a lost device)
 
 The same object is also the binding surface for the [@prsm/devtools](https://github.com/prsmjs/devtools) admin panel, which adds read methods (`listAccounts`, `getAccount`, `getStats`, `getRecentActivity`, `getRoles`, and more) on top of the actions above. See [Admin panel with devtools](./devtools.md).
 

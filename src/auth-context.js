@@ -1,8 +1,10 @@
 import * as authFunctions from "./auth-functions.js"
 import { AuthQueries } from "./queries.js"
 import { ActivityLogger } from "./activity-logger.js"
-import { AuthRole, AuthStatus, TwoFactorMechanism } from "./types.js"
-import { UserNotFoundError } from "./errors.js"
+import { AuthRole, AuthStatus, TwoFactorMechanism, AuthActivityAction } from "./types.js"
+import { UserNotFoundError, TwoFactorNotSetupError } from "./errors.js"
+
+const MECHANISM_NAMES = { [TwoFactorMechanism.TOTP]: "totp", [TwoFactorMechanism.EMAIL]: "email", [TwoFactorMechanism.SMS]: "sms" }
 
 /**
  * @typedef {import("./types.js").AuthConfig} AuthConfig
@@ -50,6 +52,30 @@ export function createAuthContext(config) {
     confirmResetPassword: (token, password) => authFunctions.confirmResetPassword(config, token, password),
     userExistsByEmail: (email) => authFunctions.userExistsByEmail(config, email),
     forceLogoutForUserBy: (identifier) => authFunctions.forceLogoutForUserBy(config, identifier),
+
+    /**
+     * Remove a single two-factor method from an account - the admin rescue path
+     * for a user who lost their authenticator device. Verifies the method
+     * belongs to the account before deleting, and writes an audit-log entry.
+     * @param {UserIdentifier} identifier
+     * @param {number} methodId
+     * @returns {Promise<void>}
+     * @throws {UserNotFoundError|TwoFactorNotSetupError}
+     */
+    async removeTwoFactorMethod(identifier, methodId) {
+      const account = await resolveAccount(queries, identifier)
+      if (!account) throw new UserNotFoundError()
+
+      const methods = await queries.findTwoFactorMethodsByAccountId(account.id)
+      const method = methods.find((m) => m.id === methodId)
+      if (!method) throw new TwoFactorNotSetupError()
+
+      await queries.deleteTwoFactorMethod(method.id)
+      await activityLogger.logActivity(account.id, AuthActivityAction.TwoFactorDisabled, {}, true, {
+        mechanism: MECHANISM_NAMES[method.mechanism],
+        by: "context",
+      })
+    },
 
     // introspection surface for @prsm/devtools
 

@@ -32,7 +32,9 @@ Read methods used by the dashboard:
 
 Control actions (the same operations available on `req.auth`):
 
-`createUser`, `register`, `deleteUserBy`, `addRoleForUserBy`, `removeRoleForUserBy`, `hasRoleForUserBy`, `changePasswordForUserBy`, `setStatusForUserBy`, `initiatePasswordResetForUserBy`, `resetPassword`, `confirmResetPassword`, `userExistsByEmail`, `forceLogoutForUserBy`.
+`createUser`, `register`, `deleteUserBy`, `addRoleForUserBy`, `removeRoleForUserBy`, `hasRoleForUserBy`, `changePasswordForUserBy`, `setStatusForUserBy`, `initiatePasswordResetForUserBy`, `resetPassword`, `confirmResetPassword`, `userExistsByEmail`, `forceLogoutForUserBy`, `removeTwoFactorMethod`.
+
+`removeTwoFactorMethod(identifier, methodId)` is the admin rescue path for a user who lost their authenticator device: it deletes one of the account's 2FA methods (after confirming it belongs to that account) and records an audit-log entry.
 
 ## Roles in the dashboard
 
